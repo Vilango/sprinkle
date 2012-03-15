@@ -1,7 +1,5 @@
 module Sprinkle
   module Installers
-    # = Apt Package Installer
-    #
     # The Apt package installer uses the +apt-get+ command to install
     # packages. The apt installer has only one option which can be
     # modified which is the +dependencies_only+ option. When this is
@@ -20,31 +18,26 @@ module Sprinkle
     # Second, only build the magic_beans dependencies:
     #
     #   package :magic_beans_depends do
-    #     apt 'magic_beans_package' { dependencies_only true }
+    #     apt 'magic_beans_package' do
+    #       dependencies_only true 
+    #     end
     #   end
     #
     # As you can see, setting options is as simple as creating a
     # block and calling the option as a method with the value as 
     # its parameter.
-    class Apt < Installer
-      attr_accessor :packages #:nodoc:
-
+    class Apt < PackageInstaller
       def initialize(parent, *packages, &block) #:nodoc:
-        packages.flatten!
-        
-        options = { :dependencies_only => false }
-        options.update(packages.pop) if packages.last.is_a?(Hash)
-        
-        super parent, options, &block
-        
-        @packages = packages
+        super parent, *packages, &block
+        @options.reverse_merge!(:dependencies_only => false)
       end
 
       protected
 
         def install_commands #:nodoc:
           command = @options[:dependencies_only] ? 'build-dep' : 'install'
-          "env DEBCONF_TERSE='yes' DEBIAN_PRIORITY='critical' DEBIAN_FRONTEND=noninteractive apt-get --force-yes -qyu #{command} #{@packages.join(' ')}"
+          noninteractive = "env DEBCONF_TERSE='yes' DEBIAN_PRIORITY='critical' DEBIAN_FRONTEND=noninteractive"
+          "#{noninteractive} #{sudo_cmd}apt-get --force-yes -qyu #{command} #{@packages.join(' ')}"
         end
 
     end

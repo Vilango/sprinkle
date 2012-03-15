@@ -12,21 +12,19 @@ module Sprinkle
     #     brew 'magic_beans_package'
     #   end
     #
-    class Brew < Installer
-      attr_accessor :formulas #:nodoc:
+    class Brew < PackageInstaller
 
-      def initialize(parent, *formulas, &block) #:nodoc:
-        formulas.flatten!
-        
-        super parent, &block
-        
-        @formulas = formulas
+      api do
+        def brew(*names, &block)
+          @recommends << :homebrew
+          install Sprinkle::Installers::Brew.new(self, *names, &block)
+        end
       end
 
       protected
 
         def install_commands #:nodoc:
-          "brew install #{@formulas.join(' ')}"
+          "brew install #{@packages.join(' ')}"
         end
 
     end

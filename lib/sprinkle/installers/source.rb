@@ -68,10 +68,17 @@ module Sprinkle
 
     class Source < Installer
       attr_accessor :source #:nodoc:
+      
+      api do
+        def source(source, options = {}, &block)
+          @recommends << :build_essential # Ubuntu/Debian
+          install Sprinkle::Installers::Source.new(self, source, options, &block)
+        end
+      end
 
       def initialize(parent, source, options = {}, &block) #:nodoc:
-        @source = source
         super parent, options, &block
+        @source = source
       end
 
       protected
@@ -97,11 +104,7 @@ module Sprinkle
         end
 
         def download_commands #:nodoc:
-          if File.exist? @source
-            [ "cp #{@source} #{@options[:archives].first}/#{archive_name}" ]
-          else
-            [ "wget -cq -O '#{@options[:archives].first}/#{archive_name}' #{@source}" ]
-          end
+          [ "wget -cq -O '#{@options[:archives].first}/#{archive_name}' #{@source}" ]
         end
 
         def extract_commands #:nodoc:

@@ -16,6 +16,7 @@ begin
     gem.add_dependency('activesupport', '>= 2.0.2')
     gem.add_dependency('highline', '>= 1.4.0')
     gem.add_dependency('capistrano', '>= 2.5.5')
+    gem.add_dependency('open4', '>= 1.1.0')
 
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
@@ -47,7 +48,11 @@ RSpec::Core::RakeTask.new(:coverage) do |t|
 end
 
 
-require 'rake/rdoctask'
+begin
+  require 'rdoc/task'
+rescue LoadError
+  require 'rake/rdoctask' 
+end
 Rake::RDocTask.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
 
